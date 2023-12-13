@@ -4,8 +4,53 @@ offsetX: var #1
 offsetY: var #1
 offsetZ: var #1
 
+color1: var #1
+color2: var #1
+
+cbrown: var #1
+static cbrown, #256
+
+cblue: var #1
+static cblue, #1024
+
+teal: var #1
+static teal, #1536
+
+mapSize: var #1
+static mapSize, #5
+
+map: var #25
+static map + #0, #0
+static map + #1, #0
+static map + #2, #0
+static map + #3, #0
+static map + #4, #0
+static map + #5, #1
+static map + #6, #1
+static map + #7, #1
+static map + #8, #0
+static map + #9, #0
+static map + #10, #1
+static map + #11, #1
+static map + #12, #1
+static map + #13, #0
+static map + #14, #0
+static map + #15, #0
+static map + #16, #0
+static map + #17, #1
+static map + #18, #0
+static map + #19, #0
+static map + #20, #0
+static map + #21, #0
+static map + #22, #1
+static map + #23, #0
+static map + #24, #0
+
+pos: var #1
+direction: var #1
+
 viewDist: var #1
-static viewDist, #12
+static viewDist, #13
 
 width: var #1
 static width, #40
@@ -21,7 +66,6 @@ static luz + #3, #126
 
 position: var #3
 products: var #12
-; square: var #12
 
 square: var #12
 
@@ -54,54 +98,163 @@ static squareFront + #10, #80
 static squareFront + #11, #100
 
 squareBottom: var #12
-static squareFront + #0, #100
-static squareFront + #1, #0
-static squareFront + #2, #100
-static squareFront + #3, #100
-static squareFront + #4, #0
-static squareFront + #5, #0
-static squareFront + #6, #0
-static squareFront + #7, #0
-static squareFront + #8, #0
-static squareFront + #9, #0
-static squareFront + #10, #0
-static squareFront + #11, #100
+static squareBottom + #0, #100
+static squareBottom + #1, #0
+static squareBottom + #2, #100
+static squareBottom + #3, #0
+static squareBottom + #4, #0
+static squareBottom + #5, #100
+static squareBottom + #6, #0
+static squareBottom + #7, #0
+static squareBottom + #8, #0
+static squareBottom + #9, #100
+static squareBottom + #10, #0
+static squareBottom + #11, #0
 
 screen: var #1200
 
 jmp main
 
 main:
-	load r0, luz
-	store pixel, r0
+	loadn r0, #22
+	store pos, r0
+	loadn r0, #5
+	not r0, r0
+	inc r0
+	store direction, r0
 
-	loadn r0, #50
-	not r0, r0
-	inc r0
-	store offsetZ, r0
-	loadn r0, #40
-	not r0, r0
-	inc r0
-	store offsetY, r0
-	loadn r0, #0
-	not r0, r0
-	inc r0
-	store offsetX, r0
+	load r0, cblue
+	store color1, r0
+	load r0, teal
+	store color2, r0
 
 	call BlankScreen
 
-	call RenderCorridor1
+	call RenderLabyrinth
 	
 	call PrintScreen
 
 	halt
 
-RenderCorridor1:
+RenderLabyrinth:
 	push r0
 	push r1
 	push r2
+	push r3
+	push r4
 	push r6
 	push r7
+
+	load r0, pos
+	load r1, direction
+	loadn r2, #25
+	loadn r4, #0
+	loadn r5, #0
+	
+	; checks positions in front
+	add r0, r0, r1 ; advances one position
+	cmp r0, r5
+	jle RenderLabyrinthLoop 
+	cmp r0, r2
+	jeg RenderLabyrinthLoop ; checks uper and lower limits
+	loadn r2, #5
+	mod r3, r0, r2
+	cmp r3, r1
+	jeq RenderLabyrinthLoop ; checks if it is going through the right side
+	mod r3, r0, r2
+	sub r3, r3, r1
+	cmp r3, r2
+	jeq RenderLabyrinthLoop ; checks if it is going through the left side
+	inc r4
+
+	loadn r2, #25
+	add r0, r0, r1 ; advances one more position
+	cmp r0, r5
+	jle RenderLabyrinthLoop 
+	cmp r0, r2
+	jeg RenderLabyrinthLoop ; checks uper and lower limits
+	loadn r2, #5
+	mod r3, r0, r2
+	cmp r3, r1
+	jeq RenderLabyrinthLoop ; checks if it is going through the right side
+	mod r3, r0, r2
+	sub r3, r3, r1
+	cmp r3, r2
+	jeq RenderLabyrinthLoop ; checks if it is going through the left side
+	inc r4
+
+	RenderLabyrinthLoop:
+		loadn r7, #50
+		not r7, r7
+		inc r7
+		loadn r6, #100
+		mul r6, r6, r4
+		add r7, r7, r6
+		store offsetZ, r7
+		loadn r7, #40
+		not r7, r7
+		inc r7
+		store offsetY, r7
+		loadn r7, #0
+		store offsetX, r7 ; stores offsets for consecutive prints
+
+		loadn r7, #luz
+		inc r7
+		add r7, r7, r4
+		loadi r7, r7
+		store pixel, r7 ; choses lighting to be used
+
+		load r0, pos
+		mul r7, r4, r1
+		add r0, r0, r7 ; recalculates position in matrix
+
+		call RenderBlockPosition ; renders chosen block and restarts the loop with the previous one
+		dec r4
+		cmp r4, r5
+		jeg RenderLabyrinthLoop
+
+	pop r7
+	pop r6
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+
+	rts
+
+RenderBlockPosition: ; receives position in r0 and direction in r1
+	push r3
+	push r4
+	push r5
+	push r6
+
+	call RenderCeiling
+	call RenderGround ; always render ceiling and ground
+
+
+
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+
+	rts
+
+RenderRightWall:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r6
+	push r7
+
+	; changes color
+	load r3, color1
+	load r4, pixel
+	add r3, r3, r4
+	store pixel, r3
 
 	; right side
 	load r0, offsetX
@@ -116,7 +269,37 @@ RenderCorridor1:
 	call ApplyOffset
 	call RenderSquare
 
-	; left side
+	store offsetX, r0 ; returns offset to normal
+	store pixel, r4 ; returns color to normal
+
+	pop r7
+	pop r6
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+
+	rts
+
+RenderLeftWall:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r6
+	push r7
+
+	; changes color
+	load r3, color1
+	load r4, pixel
+	add r3, r3, r4
+	store pixel, r3
+
+	; right side
+	load r0, offsetX
+	loadn r1, #50
 	sub r2, r0, r1
 	store offsetX, r2
 
@@ -127,10 +310,148 @@ RenderCorridor1:
 	call ApplyOffset
 	call RenderSquare
 
-	; ground
+	store offsetX, r0 ; returns offset to normal
+	store pixel, r4 ; returns color to normal
 
 	pop r7
 	pop r6
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+
+	rts
+
+RenderGround:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r6
+	push r7
+
+	load r4, pixel
+	load r3, cbrown ; changes color
+	add r3, r3, r4
+	store pixel, r3
+
+	; ground
+
+	load r0, offsetX
+	loadn r1, #50
+	sub r2, r0, r1
+	store offsetX, r2
+
+	loadn r6, #squareBottom
+	loadn r7, #square
+	call CopySquare
+
+	call ApplyOffset
+	call RenderSquare
+
+	store offsetX, r0 ; returns offset to normal
+	store pixel, r4 ; returns color to normal
+
+	pop r7
+	pop r6
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+
+	rts
+
+RenderCeiling:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+	push r6
+	push r7
+
+	load r4, pixel
+	load r3, cbrown ; changes color
+	add r3, r3, r4
+	store pixel, r3
+
+	; ceiling
+
+	load r0, offsetX
+	loadn r1, #50
+	sub r2, r0, r1
+	store offsetX, r2
+
+	load r5, offsetY
+	loadn r1, #40
+	store offsetY, r1
+
+	loadn r6, #squareBottom
+	loadn r7, #square
+	call CopySquareReversed
+
+	call ApplyOffset
+	call RenderSquare
+
+	store offsetX, r0 ; returns offset to normal
+	store offsetY, r5 ; returns offset to normal
+
+	store pixel, r4 ; returns color to normal
+
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+
+	rts
+
+RenderFront:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+	push r6
+	push r7
+
+	; right side
+	load r0, offsetX
+	loadn r1, #50
+	sub r2, r0, r1
+	store offsetX, r2
+	
+	; changes color
+	load r3, color2
+	load r4, pixel
+	add r3, r3, r4
+	store pixel, r3
+
+	; front
+	loadn r6, #squareFront
+	loadn r7, #square
+	call CopySquareReversed
+
+	call ApplyOffset
+	call RenderSquare
+
+
+	store offsetX, r0 ; returns offset to normal
+	store pixel, r4 ; returns color to normal
+
+	pop r7
+	pop r6
+	pop r5
+	pop r4
+	pop r3
 	pop r2
 	pop r1
 	pop r0
