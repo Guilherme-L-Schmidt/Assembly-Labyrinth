@@ -17,34 +17,130 @@ teal: var #1
 static teal, #1536
 
 mapSize: var #1
-static mapSize, #5
+static mapSize, #11
 
-map: var #25
-static map + #0, #0
+map: var #121
+static map + #0, #1
 static map + #1, #1
 static map + #2, #1
-static map + #3, #0
+static map + #3, #1
 static map + #4, #0
 static map + #5, #1
 static map + #6, #1
 static map + #7, #1
-static map + #8, #0
-static map + #9, #0
+static map + #8, #1
+static map + #9, #1
 static map + #10, #1
 static map + #11, #1
-static map + #12, #1
+static map + #12, #0
 static map + #13, #0
 static map + #14, #0
 static map + #15, #0
-static map + #16, #0
-static map + #17, #1
+static map + #16, #1
+static map + #17, #0
 static map + #18, #0
 static map + #19, #0
 static map + #20, #0
-static map + #21, #0
+static map + #21, #1
 static map + #22, #1
 static map + #23, #0
-static map + #24, #0
+static map + #24, #1
+static map + #25, #1
+static map + #26, #1
+static map + #27, #1
+static map + #28, #0
+static map + #29, #1
+static map + #30, #1
+static map + #31, #0
+static map + #32, #1
+static map + #33, #1
+static map + #34, #1
+static map + #35, #1
+static map + #36, #0
+static map + #37, #0
+static map + #38, #0
+static map + #39, #0
+static map + #40, #1
+static map + #41, #0
+static map + #42, #0
+static map + #43, #0
+static map + #44, #0
+static map + #45, #0
+static map + #46, #1
+static map + #47, #1
+static map + #48, #1
+static map + #49, #1
+static map + #50, #1
+static map + #51, #1
+static map + #52, #1
+static map + #53, #1
+static map + #54, #1
+static map + #55, #0
+static map + #56, #1
+static map + #57, #0
+static map + #58, #0
+static map + #59, #0
+static map + #60, #1
+static map + #61, #0
+static map + #62, #0
+static map + #63, #0
+static map + #64, #1
+static map + #65, #0
+static map + #66, #0
+static map + #67, #1
+static map + #68, #1
+static map + #69, #1
+static map + #70, #1
+static map + #71, #1
+static map + #72, #1
+static map + #73, #1
+static map + #74, #1
+static map + #75, #1
+static map + #76, #0
+static map + #77, #0
+static map + #78, #0
+static map + #79, #1
+static map + #80, #0
+static map + #81, #0
+static map + #82, #0
+static map + #83, #0
+static map + #84, #0
+static map + #85, #0
+static map + #86, #0
+static map + #87, #0
+static map + #88, #0
+static map + #89, #0
+static map + #90, #1
+static map + #91, #0
+static map + #92, #1
+static map + #93, #1
+static map + #94, #1
+static map + #95, #1
+static map + #96, #1
+static map + #97, #1
+static map + #98, #0
+static map + #99, #0
+static map + #100, #0
+static map + #101, #1
+static map + #102, #1
+static map + #103, #1
+static map + #104, #0
+static map + #105, #0
+static map + #106, #1
+static map + #107, #0
+static map + #108, #0
+static map + #109, #0
+static map + #110, #0
+static map + #111, #0
+static map + #112, #0
+static map + #113, #1
+static map + #114, #1
+static map + #115, #0
+static map + #116, #0
+static map + #117, #1
+static map + #118, #0
+static map + #119, #0
+static map + #120, #0
 
 
 
@@ -118,9 +214,9 @@ screen: var #1200
 jmp main
 
 main:
-	loadn r0, #10
+	loadn r0, #117
 	store pos, r0
-	loadn r0, #5
+	loadn r0, #11
 	not r0, r0
 	inc r0
 	store direction, r0
@@ -206,7 +302,7 @@ PRotateRight: ; rotates the player to the right
 	cmp r2, r3
 	jeq PRotateCheck
 	load r2, mapSize
-	div r1, r1, r2 ; if 5, only divides by 5 and inverts
+	div r1, r1, r2 ; if mapSize, only divides by mapSize and inverts
 	not r1, r1
 	inc r1
 	jmp PRotateCheckEnd
@@ -234,7 +330,8 @@ PMove: ; moves the player in the current direction
 
 	load r0, pos
 	load r1, direction
-	loadn r2, #25 ; mapSize ** 2
+	load r2, mapSize
+	mul r2, r2, r2
 	loadn r4, #0
 	loadn r5, #0
 
@@ -252,7 +349,8 @@ PMove: ; moves the player in the current direction
 	jeq PMoveUndo ; checks if it is going through the right side
 	mod r3, r0, r2
 	mul r3, r3, r1
-	loadn r7, #4
+	load r7, mapSize
+	dec r7
 	not r7, r7
 	inc r7
 	cmp r3, r7
@@ -293,7 +391,8 @@ RenderLabyrinth:
 
 	load r0, pos
 	load r1, direction
-	loadn r2, #25 ; mapSize ** 2
+	load r2, mapSize
+	mul r2, r2, r2
 	loadn r4, #0
 	loadn r5, #0
 	
@@ -319,7 +418,8 @@ RenderLabyrinth:
 	jeq RenderLabyrinthLoop ; checks if it is going through the left side
 	inc r4
 
-	loadn r2, #25
+	load r2, mapSize
+	mul r2, r2, r2
 	add r0, r0, r1 ; advances one more position
 	cmp r0, r5
 	jle RenderLabyrinthLoop 
@@ -398,7 +498,8 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 	call RenderGround ; always render ceiling and ground
 
 	; checks position in front
-	loadn r2, #25
+	load r2, mapSize
+	mul r2, r2, r2
 	loadn r5, #0
 	add r7, r0, r1 ; advances one position
 	cmp r7, r5
@@ -446,7 +547,8 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 			mul r1, r2, r1 ; if 1, evaluates the correct direction
 		RenderBlockPositionStartSecondCheckEnd:
 			; checks given position
-			loadn r2, #25 ; mapSize ** 2
+			load r2, mapSize
+			mul r2, r2, r2
 			loadn r5, #0
 			add r7, r0, r1 ; advances one position
 			cmp r7, r5
@@ -517,7 +619,8 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 		inc r1 ; inverts current direction
 
 		; checks given position
-		loadn r2, #25
+		load r2, mapSize
+		mul r2, r2, r2
 		loadn r5, #0
 		add r7, r0, r1 ; advances one position
 		cmp r7, r5
