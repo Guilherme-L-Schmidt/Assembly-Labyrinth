@@ -21,8 +21,8 @@ static mapSize, #5
 
 map: var #25
 static map + #0, #0
-static map + #1, #0
-static map + #2, #0
+static map + #1, #1
+static map + #2, #1
 static map + #3, #0
 static map + #4, #0
 static map + #5, #1
@@ -116,7 +116,7 @@ screen: var #1200
 jmp main
 
 main:
-	loadn r0, #22
+	loadn r0, #10
 	store pos, r0
 	loadn r0, #5
 	not r0, r0
@@ -128,13 +128,143 @@ main:
 	load r0, teal
 	store color2, r0
 
-	call BlankScreen
+	mainLoop:
 
-	call RenderLabyrinth
-	
-	call PrintScreen
+		call BlankScreen
+
+		call RenderLabyrinth
+		
+		call PrintScreen
+
+		call PlayerControler
+
+	jmp mainLoop
 
 	halt
+
+PlayerControler:
+	push r0
+	push r1
+	push r2
+
+	loadn r2, #255
+	PlayerControlerLoop:
+
+		inchar r0
+
+		loadn r1, #119 ; moves with w
+		cmp r0, r1
+		ceq PMove
+
+		loadn r1, #100
+		cmp r0, r1
+		ceq PRotateRight
+
+		loadn r1, #97
+		cmp r0, r1
+		ceq PRotateLeft
+
+		cmp r0, r2
+		jne PlayerControlerLoop
+
+	pop r2
+	pop r1
+	pop r0
+
+	rts
+
+PRotateLeft:
+	push r0
+
+	call PRotateRight
+	load r0, direction
+	not r0, r0
+	inc r0
+	store direction, r0
+
+	pop r0
+
+	rts
+
+PRotateRight: ; rotates the player to the right
+	push r1
+	push r2
+	push r3
+
+	load r1, direction
+	loadn r3, #0
+
+	load r2, mapSize
+	div r2, r1, r2
+	cmp r2, r3
+	jeq PRotateCheck
+	load r2, mapSize
+	div r1, r1, r2 ; if 5, only divides by 5 and inverts
+	not r1, r1
+	inc r1
+	jmp PRotateCheckEnd
+	PRotateCheck:
+		load r2, mapSize
+		mul r1, r2, r1 ; if 1, evaluates the correct direction
+	PRotateCheckEnd:
+
+	store direction, r1
+
+	pop r3
+	pop r2
+	pop r1
+
+	rts
+
+PMove: ; moves the player in the current direction
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	push r5
+	push r7
+
+	load r0, pos
+	load r1, direction
+	loadn r2, #25 ; mapSize ** 2
+	loadn r4, #0
+	loadn r5, #0
+
+	; checks positions in front
+	add r0, r0, r1 ; advances one position
+	cmp r0, r5
+	jle PMoveUndo 
+	cmp r0, r2
+	jeg PMoveUndo ; checks uper and lower limits
+	load r2, mapSize
+	mod r3, r0, r2
+	loadn r7, #1
+	sub r7, r1, r7
+	cmp r3, r7
+	jeq PMoveUndo ; checks if it is going through the right side
+	mod r3, r0, r2
+	sub r3, r3, r1
+	cmp r3, r2
+	jeq PMoveUndo ; checks if it is going through the left side
+	jmp PMoveEnd
+
+	PMoveUndo:
+		sub r0, r0, r1
+
+	PMoveEnd:
+
+	store pos, r0
+
+	pop r7
+	pop r5
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+
+	rts
 
 RenderLabyrinth:
 	push r0
@@ -142,14 +272,17 @@ RenderLabyrinth:
 	push r2
 	push r3
 	push r4
+	push r5
 	push r6
 	push r7
 
 	load r0, pos
 	load r1, direction
-	loadn r2, #25
+	loadn r2, #25 ; mapSize ** 2
 	loadn r4, #0
 	loadn r5, #0
+
+	;breakp
 	
 	; checks positions in front
 	add r0, r0, r1 ; advances one position
@@ -157,13 +290,18 @@ RenderLabyrinth:
 	jle RenderLabyrinthLoop 
 	cmp r0, r2
 	jeg RenderLabyrinthLoop ; checks uper and lower limits
-	loadn r2, #5
+	load r2, mapSize
 	mod r3, r0, r2
-	cmp r3, r1
+	loadn r7, #1
+	sub r7, r1, r7
+	cmp r3, r7
 	jeq RenderLabyrinthLoop ; checks if it is going through the right side
 	mod r3, r0, r2
-	sub r3, r3, r1
-	cmp r3, r2
+	mul r3, r3, r1
+	loadn r6, #4
+	not r6, r6
+	inc r6
+	cmp r3, r6
 	jeq RenderLabyrinthLoop ; checks if it is going through the left side
 	inc r4
 
@@ -173,13 +311,18 @@ RenderLabyrinth:
 	jle RenderLabyrinthLoop 
 	cmp r0, r2
 	jeg RenderLabyrinthLoop ; checks uper and lower limits
-	loadn r2, #5
+	load r2, mapSize
 	mod r3, r0, r2
-	cmp r3, r1
+	loadn r7, #1
+	sub r7, r1, r7
+	cmp r3, r7
 	jeq RenderLabyrinthLoop ; checks if it is going through the right side
 	mod r3, r0, r2
-	sub r3, r3, r1
-	cmp r3, r2
+	mul r3, r3, r1
+	loadn r6, #4
+	not r6, r6
+	inc r6
+	cmp r3, r6
 	jeq RenderLabyrinthLoop ; checks if it is going through the left side
 	inc r4
 
@@ -215,6 +358,7 @@ RenderLabyrinth:
 
 	pop r7
 	pop r6
+	pop r5
 	pop r4
 	pop r3
 	pop r2
@@ -224,20 +368,216 @@ RenderLabyrinth:
 	rts
 
 RenderBlockPosition: ; receives position in r0 and direction in r1
+	push r0
+	push r1
+	push r2
 	push r3
 	push r4
 	push r5
 	push r6
+	push r7
+
+	push r5 ; special check
 
 	call RenderCeiling
 	call RenderGround ; always render ceiling and ground
 
+	; checks position in front
+	loadn r2, #25
+	loadn r5, #0
+	add r7, r0, r1 ; advances one position
+	cmp r7, r5
+	jle RenderBlockPositionFirst
+	cmp r7, r2
+	jeg RenderBlockPositionFirst ; checks uper and lower limits
+	load r2, mapSize
+	mod r3, r7, r2
+	loadn r6, #1
+	sub r6, r1, r6
+	cmp r3, r6
+	jeq RenderBlockPositionFirst ; checks if it is going through the right side
+	mod r3, r7, r2
+	mul r3, r3, r1
+	loadn r6, #4
+	not r6, r6
+	inc r6
+	cmp r3, r6
+	jeq RenderBlockPositionFirst ; checks if it is going through the left side
+	loadn r6, #map
+	add r6, r6, r7
+	loadi r6, r6
+	cmp r6, r5
+	jeq RenderBlockPositionFirst ; checks if the position is vacant
+	jmp RenderBlockPositionStartSecond
 
+	RenderBlockPositionFirst: ; renders screen if one of the checks fail
+		call RenderFront
+	
+	;breakp
 
+	RenderBlockPositionStartSecond: ; calculates direction to the right
+		load r2, mapSize
+		div r2, r1, r2
+		cmp r2, r5
+		jeq RenderBlockPositionStartSecondCheck
+		load r2, mapSize
+		div r1, r1, r2 ; if 5, only divides by 5 and inverts
+		not r1, r1
+		inc r1
+		jmp RenderBlockPositionStartSecondCheckEnd
+		RenderBlockPositionStartSecondCheck:
+			load r2, mapSize
+			mul r1, r2, r1 ; if 1, evaluates the correct direction
+		RenderBlockPositionStartSecondCheckEnd:
+			; checks given position
+			loadn r2, #25 ; mapSize ** 2
+			loadn r5, #0
+			add r7, r0, r1 ; advances one position
+			cmp r7, r5
+			jle RenderBlockPositionSecond
+			cmp r7, r2
+			jeg RenderBlockPositionSecond ; checks uper and lower limits
+			load r2, mapSize
+			mod r3, r7, r2
+			loadn r6, #1
+			sub r6, r1, r6
+			cmp r3, r6
+			jeq RenderBlockPositionSecond ; checks if it is going through the right side
+			mod r3, r7, r2
+			mul r3, r3, r1
+			loadn r6, #4
+			not r6, r6
+			inc r6
+			cmp r3, r6
+			jeq RenderBlockPositionSecond ; checks if it is going through the left side
+			loadn r6, #map
+			add r6, r6, r7
+			loadi r6, r6
+			cmp r6, r5
+			jeq RenderBlockPositionSecond ; checks if the position is vacant
+
+				pop r5
+				loadn r6, #1
+				cmp r5, r6
+				push r5
+				jeq RenderBlockPositionStartThird
+
+				loadn r6, #128
+				load r7, pixel
+				mod r7, r7, r6
+				loadn r6, #126
+				cmp r6, r7
+				jeq RenderBlockPositionStartThird ; uses light to check if it must continue
+
+					; calls recursivelly to check further
+					load r7, pixel
+					inc r7
+					store pixel, r7
+					load r6, offsetX ; updates position, light and offset
+					loadn r7, #100
+					add r7, r6, r7
+					store offsetX, r7
+					mov r7, r0
+					add r0, r0, r1
+					push r1
+					load r1, direction
+					loadn r5, #1
+					call RenderBlockPosition ; call new check
+					loadn r5, #0
+					pop r1
+					mov r0, r7
+					store offsetX, r6 ; returns position, light and offset to original values
+					load r7, pixel
+					dec r7
+					store pixel, r7
+				jmp RenderBlockPositionStartThird
+
+	RenderBlockPositionSecond: ; renders screen if one of the checks fail
+		call RenderRightWall
+
+	RenderBlockPositionStartThird: ; checks wall to the left
+		not r1, r1
+		inc r1 ; inverts current direction
+
+		; checks given position
+		loadn r2, #25
+		loadn r5, #0
+		add r7, r0, r1 ; advances one position
+		cmp r7, r5
+		jle RenderBlockPositionThird
+		cmp r7, r2
+		jeg RenderBlockPositionThird ; checks uper and lower limits
+		load r2, mapSize
+		mod r3, r7, r2
+		loadn r6, #1
+		sub r6, r1, r6
+		cmp r3, r6
+		jeq RenderBlockPositionThird ; checks if it is going through the right side
+		mod r3, r7, r2
+		mul r3, r3, r1
+		loadn r6, #4
+		not r6, r6
+		inc r6
+		cmp r3, r6
+		jeq RenderBlockPositionThird ; checks if it is going through the left side
+		loadn r6, #map
+		add r6, r6, r7
+		loadi r6, r6
+		cmp r6, r5
+		jeq RenderBlockPositionThird ; checks if the position is vacant
+
+			pop r5
+			loadn r6, #1
+			cmp r5, r6
+			push r5
+			jeq RenderBlockPositionEnd
+
+			loadn r6, #128
+			load r7, pixel
+			mod r7, r7, r6
+			loadn r6, #126
+			cmp r6, r7
+			jeq RenderBlockPositionEnd ; uses light to check if it must continue
+			; calls recursivelly to check further
+				load r7, pixel
+				inc r7
+				store pixel, r7
+				load r6, offsetX ; updates position, light and offset
+				loadn r7, #100
+				add r7, r6, r7
+				not r7, r7
+				inc r7
+				store offsetX, r7
+				mov r7, r0
+				add r0, r0, r1
+				push r1
+				load r1, direction
+				loadn r5, #1
+				call RenderBlockPosition ; call new check
+				loadn r5, #0
+				pop r1
+				mov r0, r7
+				store offsetX, r6 ; returns position, light and offset to original values
+				load r7, pixel
+				dec r7
+				store pixel, r7
+			jmp RenderBlockPositionEnd
+
+	RenderBlockPositionThird: ; renders screen if one of the checks fail
+		call RenderLeftWall
+
+	RenderBlockPositionEnd:
+
+	pop r5
+
+	pop r7
 	pop r6
 	pop r5
 	pop r4
 	pop r3
+	pop r2
+	pop r1
+	pop r0
 
 	rts
 
