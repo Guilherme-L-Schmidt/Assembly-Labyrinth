@@ -46,6 +46,8 @@ static map + #22, #1
 static map + #23, #0
 static map + #24, #0
 
+
+
 pos: var #1
 direction: var #1
 
@@ -309,7 +311,8 @@ RenderLabyrinth:
 	jeq RenderLabyrinthLoop ; checks if it is going through the right side
 	mod r3, r0, r2
 	mul r3, r3, r1
-	loadn r6, #4
+	load r6, mapSize
+	dec r6
 	not r6, r6
 	inc r6
 	cmp r3, r6
@@ -330,7 +333,8 @@ RenderLabyrinth:
 	jeq RenderLabyrinthLoop ; checks if it is going through the right side
 	mod r3, r0, r2
 	mul r3, r3, r1
-	loadn r6, #4
+	load r6, mapSize
+	dec r6
 	not r6, r6
 	inc r6
 	cmp r3, r6
@@ -409,7 +413,8 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 	jeq RenderBlockPositionFirst ; checks if it is going through the right side
 	mod r3, r7, r2
 	mul r3, r3, r1
-	loadn r6, #4
+	load r6, mapSize
+	dec r6
 	not r6, r6
 	inc r6
 	cmp r3, r6
@@ -456,7 +461,8 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 			jeq RenderBlockPositionSecond ; checks if it is going through the right side
 			mod r3, r7, r2
 			mul r3, r3, r1
-			loadn r6, #4
+			load r6, mapSize
+			dec r6
 			not r6, r6
 			inc r6
 			cmp r3, r6
@@ -526,7 +532,8 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 		jeq RenderBlockPositionThird ; checks if it is going through the right side
 		mod r3, r7, r2
 		mul r3, r3, r1
-		loadn r6, #4
+		load r6, mapSize
+		dec r6
 		not r6, r6
 		inc r6
 		cmp r3, r6
