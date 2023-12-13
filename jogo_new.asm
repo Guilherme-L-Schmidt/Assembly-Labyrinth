@@ -191,6 +191,11 @@ PRotateRight: ; rotates the player to the right
 	push r2
 	push r3
 
+	load r1, color1
+	load r2, color2
+	store color2, r1
+	store color1, r2
+
 	load r1, direction
 	loadn r3, #0
 
@@ -244,9 +249,17 @@ PMove: ; moves the player in the current direction
 	cmp r3, r7
 	jeq PMoveUndo ; checks if it is going through the right side
 	mod r3, r0, r2
-	sub r3, r3, r1
-	cmp r3, r2
+	mul r3, r3, r1
+	loadn r7, #4
+	not r7, r7
+	inc r7
+	cmp r3, r7
 	jeq PMoveUndo ; checks if it is going through the left side
+	loadn r3, #map
+	add r3, r3, r0
+	loadi r3, r3
+	cmp r3, r5
+	jeq PMoveUndo ; checks if the position is vacant
 	jmp PMoveEnd
 
 	PMoveUndo:
@@ -281,8 +294,6 @@ RenderLabyrinth:
 	loadn r2, #25 ; mapSize ** 2
 	loadn r4, #0
 	loadn r5, #0
-
-	;breakp
 	
 	; checks positions in front
 	add r0, r0, r1 ; advances one position
