@@ -226,8 +226,7 @@ main:
 	store pos, r0
 
 	loadn r0, #11
-	not r0, r0
-	inc r0
+	neg r0, r0
 	store direction, r0
 
 	load r0, cblue
@@ -301,13 +300,12 @@ PlayerControler:
 
 	rts
 
-PRotateLeft:
+PRotateLeft: ; rotates the player to the left
 	push r0
 
 	call PRotateRight
 	load r0, direction
-	not r0, r0
-	inc r0
+	neg r0, r0
 	store direction, r0
 
 	pop r0
@@ -333,8 +331,7 @@ PRotateRight: ; rotates the player to the right
 	jeq PRotateCheck
 	load r2, mapSize
 	div r1, r1, r2 ; if mapSize, only divides by mapSize and inverts
-	not r1, r1
-	inc r1
+	neg r1, r1
 	jmp PRotateCheckEnd
 	PRotateCheck:
 		load r2, mapSize
@@ -381,8 +378,7 @@ PMove: ; moves the player in the current direction
 	mul r3, r3, r1
 	load r7, mapSize
 	dec r7
-	not r7, r7
-	inc r7
+	neg r7, r7
 	cmp r3, r7
 	jeq PMoveUndo ; checks if it is going through the left side
 	loadn r3, #map
@@ -442,8 +438,7 @@ RenderLabyrinth:
 	mul r3, r3, r1
 	load r6, mapSize
 	dec r6
-	not r6, r6
-	inc r6
+	neg r6, r6
 	cmp r3, r6
 	jeq RenderLabyrinthLoop ; checks if it is going through the left side
 	inc r4
@@ -465,23 +460,20 @@ RenderLabyrinth:
 	mul r3, r3, r1
 	load r6, mapSize
 	dec r6
-	not r6, r6
-	inc r6
+	neg r6, r6
 	cmp r3, r6
 	jeq RenderLabyrinthLoop ; checks if it is going through the left side
 	inc r4
 
 	RenderLabyrinthLoop:
 		loadn r7, #50
-		not r7, r7
-		inc r7
+		neg r7, r7
 		loadn r6, #100
 		mul r6, r6, r4
 		add r7, r7, r6
 		store offsetZ, r7
 		loadn r7, #40
-		not r7, r7
-		inc r7
+		neg r7, r7
 		store offsetY, r7
 		loadn r7, #0
 		store offsetX, r7 ; stores offsets for consecutive prints
@@ -546,8 +538,7 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 	mul r3, r3, r1
 	load r6, mapSize
 	dec r6
-	not r6, r6
-	inc r6
+	neg r6, r6
 	cmp r3, r6
 	jeq RenderBlockPositionFirst ; checks if it is going through the left side
 	loadn r6, #map
@@ -569,8 +560,7 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 		jeq RenderBlockPositionStartSecondCheck
 		load r2, mapSize
 		div r1, r1, r2 ; if 5, only divides by 5 and inverts
-		not r1, r1
-		inc r1
+		neg r1, r1
 		jmp RenderBlockPositionStartSecondCheckEnd
 		RenderBlockPositionStartSecondCheck:
 			load r2, mapSize
@@ -595,8 +585,7 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 			mul r3, r3, r1
 			load r6, mapSize
 			dec r6
-			not r6, r6
-			inc r6
+			neg r6, r6
 			cmp r3, r6
 			jeq RenderBlockPositionSecond ; checks if it is going through the left side
 			loadn r6, #map
@@ -645,8 +634,7 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 		call RenderRightWall
 
 	RenderBlockPositionStartThird: ; checks wall to the left
-		not r1, r1
-		inc r1 ; inverts current direction
+		neg r1, r1 ; inverts current direction
 
 		; checks given position
 		load r2, mapSize
@@ -667,8 +655,7 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 		mul r3, r3, r1
 		load r6, mapSize
 		dec r6
-		not r6, r6
-		inc r6
+		neg r6, r6
 		cmp r3, r6
 		jeq RenderBlockPositionThird ; checks if it is going through the left side
 		loadn r6, #map
@@ -696,8 +683,7 @@ RenderBlockPosition: ; receives position in r0 and direction in r1
 				load r6, offsetX ; updates position, light and offset
 				loadn r7, #100
 				add r7, r6, r7
-				not r7, r7
-				inc r7
+				neg r7, r7
 				store offsetX, r7
 				mov r7, r0
 				add r0, r0, r1
@@ -1209,8 +1195,7 @@ ScreenToXY: ; converts screen coordinates at r7 to x at r0 and y at r1
 	load r2, height
 	div r2, r2, r3
 	sub r1, r1, r2
-	not r1, r1
-	inc r1
+	neg r1, r1
 
 	pop r3
 	pop r2
