@@ -18,8 +18,8 @@ Both are modified to work correctly with negative numbers and to implement the N
 To start the game, assure that you have the files `sim` and `montador`, as found here and in the mentioned fork. Afterwards, use the following commands to assemble and run the game simulation:
 
 ```
-./montador jogo.asm jogo.mif
-./sim jogo.mif charmap.mif
+./montador jogo_new.asm jogo_new.mif
+./sim jogo_new.mif charmap.mif
 ```
 
 ## Ending notes
