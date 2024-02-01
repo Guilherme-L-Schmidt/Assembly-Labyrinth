@@ -10,7 +10,7 @@ You can use the standard commands W, A, S, and D to move about the labyrinth sea
 
 ## Assembling and Simulation
 
-To assemble the game and simulate it in the ICMC architecture I am using my own fork of those tools, found at [Processador ICMC](https://github.com/Guilherme-L-Schmidt/Processador-ICMC/tree/master/Simulator_Source). The correct assembler is found in the `NovoMontadorLinux/montadorLinux` folder, and the simulator in the `Simulator_Source` folder.
+To assemble the game and simulate it in the ICMC architecture I am using my own fork of those tools, found at [Processador ICMC](https://github.com/Guilherme-L-Schmidt/Processador-ICMC). The correct assembler is found in the `NovoMontadorLinux/montadorLinux` folder, and the simulator in the `Simulator_Source` folder.
 Both are modified to work correctly with negative numbers and to implement the NEG instruction (to store the negative of a given number in the register using the two's complement format).
 
 `montador` is the assembler and `sim` is the simulator, both compatible primarily with Linux.
